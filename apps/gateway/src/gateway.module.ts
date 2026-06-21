@@ -4,7 +4,7 @@ import { GatewayService } from './gateway.service';
 import { ObservabilityModule } from '../../../libs/observability/src/index'
 
 @Module({
-  imports: [],
+  imports: [ObservabilityModule],
   controllers: [GatewayController],
   providers: [GatewayService],
 })

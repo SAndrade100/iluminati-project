@@ -9,4 +9,9 @@ export class CatalogoController {
   getHello(): string {
     return this.catalogoService.getHello();
   }
+
+  @Get('health')
+  health() {
+    return { status: 'ok', service: 'catalogo' };
+  }
 }
