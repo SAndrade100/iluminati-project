@@ -4,7 +4,7 @@
   "sourceRoot": "apps/iluminati/src",
   "compilerOptions": {
     "deleteOutDir": true,
-    "webpack": true,
+    "webpack": false,
     "tsConfigPath": "apps/iluminati/tsconfig.app.json"
   },
   "monorepo": true,
