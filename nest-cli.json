@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/iluminati/src",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/iluminati/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/iluminati",
+  "projects": {
+    "catalogo": {
+      "type": "application",
+      "root": "apps/catalogo",
+      "entryFile": "main",
+      "sourceRoot": "apps/catalogo/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/catalogo/tsconfig.app.json"
+      }
+    },
+    "gateway": {
+      "type": "application",
+      "root": "apps/gateway",
+      "entryFile": "main",
+      "sourceRoot": "apps/gateway/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/gateway/tsconfig.app.json"
+      }
+    },
+    "iluminati": {
+      "type": "application",
+      "root": "apps/iluminati",
+      "entryFile": "main",
+      "sourceRoot": "apps/iluminati/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/iluminati/tsconfig.app.json"
+      }
+    },
+    "observability": {
+      "type": "library",
+      "root": "libs/observability",
+      "entryFile": "index",
+      "sourceRoot": "libs/observability/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/observability/tsconfig.lib.json"
+      }
+    }
+  }
+}
