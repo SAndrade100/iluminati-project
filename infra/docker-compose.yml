@@ -52,7 +52,27 @@ services:
     networks:
       - iluminati-net
     
-  # 5. Redis (Cache e Rate Limiting Storage)
+  # 5. PostgreSQL (Banco de Dados Principal)
+  postgres:
+    image: postgres:16-alpine
+    container_name: iluminati-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-iluminati}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iluminati_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-iluminati_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - iluminati-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-iluminati}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 6. Redis (Cache e Rate Limiting Storage)
   redis:
     image: redis:7.2-alpine
     container_name: iluminati-redis
@@ -81,3 +101,6 @@ services:
 networks:
   iluminati-net:
     driver: bridge
+
+volumes:
+  postgres_data:
