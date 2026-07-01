@@ -99,6 +99,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/pedidos/tsconfig.app.json"
       }
+    },
+    "seller": {
+      "type": "application",
+      "root": "apps/seller",
+      "entryFile": "main",
+      "sourceRoot": "apps/seller/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/seller/tsconfig.app.json"
+      }
     }
   }
 }

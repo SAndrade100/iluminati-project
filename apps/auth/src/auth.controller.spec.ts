@@ -3,20 +3,12 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
 describe('AuthController', () => {
-  let authController: AuthController;
-
-  beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
+  it('should be defined', async () => {
+    const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
-      providers: [AuthService],
+      providers: [{ provide: AuthService, useValue: {} }],
     }).compile();
-
-    authController = app.get<AuthController>(AuthController);
-  });
-
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(authController.getHello()).toBe('Hello World!');
-    });
+    expect(module.get<AuthController>(AuthController)).toBeDefined();
   });
 });
+

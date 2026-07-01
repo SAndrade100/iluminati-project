@@ -3,20 +3,12 @@ import { PedidosController } from './pedidos.controller';
 import { PedidosService } from './pedidos.service';
 
 describe('PedidosController', () => {
-  let pedidosController: PedidosController;
-
-  beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
+  it('should be defined', async () => {
+    const module: TestingModule = await Test.createTestingModule({
       controllers: [PedidosController],
-      providers: [PedidosService],
+      providers: [{ provide: PedidosService, useValue: {} }],
     }).compile();
-
-    pedidosController = app.get<PedidosController>(PedidosController);
-  });
-
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(pedidosController.getHello()).toBe('Hello World!');
-    });
+    expect(module.get<PedidosController>(PedidosController)).toBeDefined();
   });
 });
+

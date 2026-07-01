@@ -1,16 +1,16 @@
 import {
-  Controller, Get, Post, Patch, Delete,
+  Controller, Get, Post, Patch, Delete, Put,
   Param, Body, Query, Req, HttpCode, HttpStatus,
-  All,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { GatewayService } from './gateway.service';
 import { Public, CurrentUser, CurrentUserData } from '@app/auth-common';
 
 const CATALOGO_URL = process.env.CATALOGO_SERVICE_URL ?? 'http://localhost:3001';
-const PEDIDOS_URL = process.env.PEDIDOS_SERVICE_URL ?? 'http://localhost:3003';
+const PEDIDOS_URL  = process.env.PEDIDOS_SERVICE_URL  ?? 'http://localhost:3003';
 const PAGAMENTOS_URL = process.env.PAGAMENTOS_SERVICE_URL ?? 'http://localhost:3004';
-const AUTH_URL = process.env.AUTH_SERVICE_URL ?? 'http://localhost:3002';
+const AUTH_URL     = process.env.AUTH_SERVICE_URL     ?? 'http://localhost:3002';
+const SELLER_URL   = process.env.SELLER_SERVICE_URL   ?? 'http://localhost:3005';
 
 @Controller()
 export class GatewayController {
@@ -111,6 +111,104 @@ export class GatewayController {
   @HttpCode(HttpStatus.OK)
   refundPayment(@Param('orderId') orderId: string, @Req() req: Request) {
     return this.gatewaySvc.forward(PAGAMENTOS_URL, 'POST', `/payments/order/${orderId}/refund`, undefined, this.authHeader(req));
+  }
+
+  // ─── Sellers ──────────────────────────────────────────────
+  @Post('sellers/apply')
+  applyAsSeller(@Body() body: unknown, @Req() req: Request) {
+    return this.gatewaySvc.forward(SELLER_URL, 'POST', '/sellers/apply', body, this.authHeader(req));
+  }
+
+  @Get('sellers/me')
+  getMySellerProfile(@Req() req: Request) {
+    return this.gatewaySvc.forward(SELLER_URL, 'GET', '/sellers/me', undefined, this.authHeader(req));
+  }
+
+  @Patch('sellers/me')
+  updateMySellerProfile(@Body() body: unknown, @Req() req: Request) {
+    return this.gatewaySvc.forward(SELLER_URL, 'PATCH', '/sellers/me', body, this.authHeader(req));
+  }
+
+  @Get('sellers/admin')
+  getSellersAdmin(@Query() query: Record<string, string>, @Req() req: Request) {
+    const qs = new URLSearchParams(query).toString();
+    return this.gatewaySvc.forward(SELLER_URL, 'GET', `/sellers/admin${qs ? `?${qs}` : ''}`, undefined, this.authHeader(req));
+  }
+
+  @Put('sellers/:id/approve')
+  @HttpCode(HttpStatus.OK)
+  approveSeller(@Param('id') id: string, @Req() req: Request) {
+    return this.gatewaySvc.forward(SELLER_URL, 'PUT', `/sellers/${id}/approve`, undefined, this.authHeader(req));
+  }
+
+  @Put('sellers/:id/suspend')
+  @HttpCode(HttpStatus.OK)
+  suspendSeller(@Param('id') id: string, @Req() req: Request) {
+    return this.gatewaySvc.forward(SELLER_URL, 'PUT', `/sellers/${id}/suspend`, undefined, this.authHeader(req));
+  }
+
+  @Public()
+  @Get('sellers')
+  getSellers(@Query() query: Record<string, string>) {
+    const qs = new URLSearchParams(query).toString();
+    return this.gatewaySvc.forward(SELLER_URL, 'GET', `/sellers${qs ? `?${qs}` : ''}`);
+  }
+
+  @Public()
+  @Get('sellers/:id')
+  getSeller(@Param('id') id: string) {
+    return this.gatewaySvc.forward(SELLER_URL, 'GET', `/sellers/${id}`);
+  }
+
+  // ─── Categories ───────────────────────────────────────────
+  @Public()
+  @Get('categories')
+  getCategories() {
+    return this.gatewaySvc.forward(CATALOGO_URL, 'GET', '/categories');
+  }
+
+  @Post('categories')
+  createCategory(@Body() body: unknown, @Req() req: Request) {
+    return this.gatewaySvc.forward(CATALOGO_URL, 'POST', '/categories', body, this.authHeader(req));
+  }
+
+  @Delete('categories/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteCategory(@Param('id') id: string, @Req() req: Request) {
+    return this.gatewaySvc.forward(CATALOGO_URL, 'DELETE', `/categories/${id}`, undefined, this.authHeader(req));
+  }
+
+  // ─── Cart ─────────────────────────────────────────────────
+  @Get('cart')
+  getCart(@Req() req: Request) {
+    return this.gatewaySvc.forward(PEDIDOS_URL, 'GET', '/cart', undefined, this.authHeader(req));
+  }
+
+  @Post('cart/items')
+  addCartItem(@Body() body: unknown, @Req() req: Request) {
+    return this.gatewaySvc.forward(PEDIDOS_URL, 'POST', '/cart/items', body, this.authHeader(req));
+  }
+
+  @Patch('cart/items/:productId')
+  updateCartItem(@Param('productId') productId: string, @Body() body: unknown, @Req() req: Request) {
+    return this.gatewaySvc.forward(PEDIDOS_URL, 'PATCH', `/cart/items/${productId}`, body, this.authHeader(req));
+  }
+
+  @Delete('cart/items/:productId')
+  removeCartItem(@Param('productId') productId: string, @Req() req: Request) {
+    return this.gatewaySvc.forward(PEDIDOS_URL, 'DELETE', `/cart/items/${productId}`, undefined, this.authHeader(req));
+  }
+
+  @Delete('cart')
+  @HttpCode(HttpStatus.OK)
+  clearCart(@Req() req: Request) {
+    return this.gatewaySvc.forward(PEDIDOS_URL, 'DELETE', '/cart', undefined, this.authHeader(req));
+  }
+
+  @Post('cart/checkout')
+  @HttpCode(HttpStatus.CREATED)
+  checkout(@Body() body: unknown, @Req() req: Request) {
+    return this.gatewaySvc.forward(PEDIDOS_URL, 'POST', '/cart/checkout', body, this.authHeader(req));
   }
 
   // ─── Helper ───────────────────────────────────────────────

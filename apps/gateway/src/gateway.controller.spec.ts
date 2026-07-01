@@ -3,20 +3,11 @@ import { GatewayController } from './gateway.controller';
 import { GatewayService } from './gateway.service';
 
 describe('GatewayController', () => {
-  let gatewayController: GatewayController;
-
-  beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
+  it('should be defined', async () => {
+    const module: TestingModule = await Test.createTestingModule({
       controllers: [GatewayController],
-      providers: [GatewayService],
+      providers: [{ provide: GatewayService, useValue: {} }],
     }).compile();
-
-    gatewayController = app.get<GatewayController>(GatewayController);
-  });
-
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(gatewayController.getHello()).toBe('Hello World!');
-    });
+    expect(module.get<GatewayController>(GatewayController)).toBeDefined();
   });
 });

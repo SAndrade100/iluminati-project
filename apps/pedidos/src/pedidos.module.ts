@@ -3,6 +3,8 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { PedidosController } from './pedidos.controller';
 import { PedidosEventsController } from './pedidos-events.controller';
 import { PedidosService } from './pedidos.service';
+import { CartController } from './cart/cart.controller';
+import { CartService } from './cart/cart.service';
 import { ObservabilityModule, HealthModule } from '@app/observability';
 import { DatabaseModule } from '@app/database';
 import { AuthCommonModule } from '@app/auth-common';
@@ -26,7 +28,7 @@ import { QUEUES } from '@app/events';
       },
     ]),
   ],
-  controllers: [PedidosController, PedidosEventsController],
-  providers: [PedidosService],
+  controllers: [PedidosController, PedidosEventsController, CartController],
+  providers: [PedidosService, CartService],
 })
 export class PedidosModule {}

@@ -27,4 +27,13 @@ export class CreateProductDto {
   @IsNotEmpty()
   @MaxLength(60)
   sku: string;
+
+  @IsString()
+  @IsOptional()
+  categoryId?: string;
+
+  // Apenas ADMIN pode definir manualmente; para SELLER é ignorado (sobrescrito pelo sellerId do perfil)
+  @IsString()
+  @IsOptional()
+  sellerId?: string;
 }
