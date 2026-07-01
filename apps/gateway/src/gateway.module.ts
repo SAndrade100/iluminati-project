@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { HttpModule } from '@nestjs/axios';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { GatewayController } from './gateway.controller';
 import { GatewayService } from './gateway.service';
@@ -11,6 +12,7 @@ import { ThrottlerRedisStorage } from './throttler-redis.storage';
   imports: [
     ObservabilityModule,
     AuthCommonModule,
+    HttpModule.register({ timeout: 10_000 }),
     ThrottlerModule.forRoot({
       throttlers: [
         { name: 'short', ttl: 1000, limit: 20 },

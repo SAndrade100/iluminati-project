@@ -46,6 +46,15 @@
         "tsConfigPath": "libs/database/tsconfig.lib.json"
       }
     },
+    "events": {
+      "type": "library",
+      "root": "libs/events",
+      "entryFile": "index",
+      "sourceRoot": "libs/events/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/events/tsconfig.lib.json"
+      }
+    },
     "gateway": {
       "type": "application",
       "root": "apps/gateway",
@@ -71,6 +80,24 @@
       "sourceRoot": "libs/observability/src",
       "compilerOptions": {
         "tsConfigPath": "libs/observability/tsconfig.lib.json"
+      }
+    },
+    "pagamentos": {
+      "type": "application",
+      "root": "apps/pagamentos",
+      "entryFile": "main",
+      "sourceRoot": "apps/pagamentos/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/pagamentos/tsconfig.app.json"
+      }
+    },
+    "pedidos": {
+      "type": "application",
+      "root": "apps/pedidos",
+      "entryFile": "main",
+      "sourceRoot": "apps/pedidos/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/pedidos/tsconfig.app.json"
       }
     }
   }

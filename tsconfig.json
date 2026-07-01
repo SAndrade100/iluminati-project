@@ -30,6 +30,12 @@
       "@app/database/*": [
         "libs/database/src/*"
       ],
+      "@app/events": [
+        "libs/events/src"
+      ],
+      "@app/events/*": [
+        "libs/events/src/*"
+      ],
       "@app/observability": [
         "libs/observability/src"
       ],

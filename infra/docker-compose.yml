@@ -98,9 +98,30 @@ services:
     networks:
       - iluminati-net
   
+  # 7. RabbitMQ (Message Broker — eventos assíncronos)
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: iluminati-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-iluminati}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-iluminati_rabbit}
+    ports:
+      - "5672:5672"    # AMQP
+      - "15672:15672"  # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    networks:
+      - iluminati-net
+
 networks:
   iluminati-net:
     driver: bridge
 
 volumes:
   postgres_data:
+  rabbitmq_data:
