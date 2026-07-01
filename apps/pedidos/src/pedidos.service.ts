@@ -3,6 +3,7 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { PrismaService, OrderStatus, ProductStatus } from '@app/database';
+import { MetricsService } from '@app/observability';
 import { EVENTS, OrderCreatedEvent, PaymentProcessedEvent } from '@app/events';
 import { CreateOrderDto } from './dto/create-order.dto';
 
@@ -13,6 +14,7 @@ export class PedidosService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject('PAGAMENTOS_CLIENT') private readonly pagamentosClient: ClientProxy,
+    private readonly metrics: MetricsService,
   ) {}
 
   async create(userId: string, dto: CreateOrderDto) {
@@ -77,6 +79,7 @@ export class PedidosService {
     });
 
     this.logger.log(`Order created: ${order.id} for user ${userId}`);
+    this.metrics.recordOrderCreated(totalPrice);
 
     // Publica evento para pagamentos processar automaticamente
     const event: OrderCreatedEvent = {
@@ -145,11 +148,13 @@ export class PedidosService {
           data: { stock: { increment: item.quantity } },
         });
       }
-      return tx.order.update({
+      const cancelled = await tx.order.update({
         where: { id },
         data: { status: OrderStatus.CANCELLED },
         include: { items: true, payment: true },
       });
+      this.metrics.recordOrderCancelled();
+      return cancelled;
     });
   }
 }

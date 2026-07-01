@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '@app/database';
+import { MetricsService } from '@app/observability';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
@@ -19,6 +20,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly metrics: MetricsService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -34,6 +36,7 @@ export class AuthService {
     });
 
     this.logger.log(`User registered: ${user.email}`);
+    this.metrics.recordRegistration();
     return user;
   }
 
@@ -45,9 +48,11 @@ export class AuthService {
 
     const passwordMatch = await bcrypt.compare(dto.password, user.password);
     if (!passwordMatch) {
+      this.metrics.recordLogin(false);
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    this.metrics.recordLogin(true);
     return this.issueTokenPair(user.id, user.email, user.role);
   }
 

@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException, Logger, Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { PrismaService, PaymentStatus } from '@app/database';
+import { MetricsService } from '@app/observability';
 import { EVENTS, OrderCreatedEvent, PaymentProcessedEvent } from '@app/events';
 
 @Injectable()
@@ -10,6 +11,7 @@ export class PagamentosService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject('PEDIDOS_CLIENT') private readonly pedidosClient: ClientProxy,
+    private readonly metrics: MetricsService,
   ) {}
 
   async findByOrder(orderId: string) {
@@ -47,6 +49,7 @@ export class PagamentosService {
     });
 
     this.logger.log(`Payment ${paymentId} for order ${orderId}: ${newStatus}`);
+    this.metrics.recordPaymentProcessed(approved ? 'APPROVED' : 'REFUSED');
 
     const event: PaymentProcessedEvent = {
       orderId,

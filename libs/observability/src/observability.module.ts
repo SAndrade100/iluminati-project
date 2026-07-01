@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ObservabilityService } from './observability.service';
-import { LoggerModule } from 'nestjs-pino'
-import { trace } from '@opentelemetry/api'
+import { MetricsService } from './metrics.service';
+import { LoggerModule } from 'nestjs-pino';
+import { trace } from '@opentelemetry/api';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { trace } from '@opentelemetry/api'
       },
     }),
   ],
-  exports: [LoggerModule],
+  providers: [MetricsService],
+  exports: [LoggerModule, MetricsService],
 })
 export class ObservabilityModule {}

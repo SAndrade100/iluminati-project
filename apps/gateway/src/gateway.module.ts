@@ -4,14 +4,17 @@ import { HttpModule } from '@nestjs/axios';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { GatewayController } from './gateway.controller';
 import { GatewayService } from './gateway.service';
-import { ObservabilityModule } from '@app/observability';
+import { ObservabilityModule, HealthModule } from '@app/observability';
 import { AuthCommonModule, JwtAuthGuard, RolesGuard } from '@app/auth-common';
+import { DatabaseModule } from '@app/database';
 import { ThrottlerRedisStorage } from './throttler-redis.storage';
 
 @Module({
   imports: [
     ObservabilityModule,
     AuthCommonModule,
+    DatabaseModule,
+    HealthModule,
     HttpModule.register({ timeout: 10_000 }),
     ThrottlerModule.forRoot({
       throttlers: [

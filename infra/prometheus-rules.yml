@@ -1,0 +1,61 @@
+groups:
+  - name: iluminati.business
+    interval: 30s
+    rules:
+      # Taxa de pagamentos recusados > 20% nos últimos 5 min
+      - alert: HighPaymentRefusalRate
+        expr: |
+          (
+            rate(payments_processed_total{status="REFUSED"}[5m])
+            /
+            (rate(payments_processed_total{status="APPROVED"}[5m]) + rate(payments_processed_total{status="REFUSED"}[5m]) + 0.0001)
+          ) > 0.20
+        for: 2m
+        labels:
+          severity: critical
+          service: pagamentos
+        annotations:
+          summary: "Taxa de recusa de pagamentos acima de 20%"
+          description: "{{ $value | humanizePercentage }} dos pagamentos estão sendo recusados."
+
+      # Nenhum pedido criado nos últimos 10 min (possível falha no serviço)
+      - alert: NoOrdersCreated
+        expr: increase(orders_created_total[10m]) == 0
+        for: 10m
+        labels:
+          severity: warning
+          service: pedidos
+        annotations:
+          summary: "Nenhum pedido criado nos últimos 10 minutos"
+          description: "Pode indicar falha no serviço de pedidos ou ausência de tráfego."
+
+  - name: iluminati.sla
+    interval: 15s
+    rules:
+      # Latência HTTP p95 acima de 1 segundo
+      - alert: HighHttpLatency
+        expr: |
+          histogram_quantile(0.95,
+            sum by (route, le) (rate(http_request_duration_bucket[5m]))
+          ) > 1000
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Latência HTTP p95 acima de 1s na rota {{ $labels.route }}"
+          description: "p95 = {{ $value }}ms. SLA: máximo 1000ms."
+
+      # Taxa de erros HTTP 5xx > 1% do total
+      - alert: HighErrorRate
+        expr: |
+          (
+            rate(http_request_duration_count{status_code=~"5.."}[5m])
+            /
+            (rate(http_request_duration_count[5m]) + 0.0001)
+          ) > 0.01
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Taxa de erros 5xx acima de 1%"
+          description: "{{ $value | humanizePercentage }} das requisições estão retornando erro."

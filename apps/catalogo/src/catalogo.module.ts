@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { CatalogoController } from './catalogo.controller';
 import { CatalogoService } from './catalogo.service';
-import { ObservabilityModule } from '@app/observability';
+import { ObservabilityModule, HealthModule } from '@app/observability';
 import { DatabaseModule } from '@app/database';
 
 @Module({
-  imports: [ObservabilityModule, DatabaseModule],
+  imports: [ObservabilityModule, DatabaseModule, HealthModule],
   controllers: [CatalogoController],
   providers: [CatalogoService],
 })

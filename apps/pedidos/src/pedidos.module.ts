@@ -3,7 +3,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { PedidosController } from './pedidos.controller';
 import { PedidosEventsController } from './pedidos-events.controller';
 import { PedidosService } from './pedidos.service';
-import { ObservabilityModule } from '@app/observability';
+import { ObservabilityModule, HealthModule } from '@app/observability';
 import { DatabaseModule } from '@app/database';
 import { AuthCommonModule } from '@app/auth-common';
 import { QUEUES } from '@app/events';
@@ -13,6 +13,7 @@ import { QUEUES } from '@app/events';
     ObservabilityModule,
     DatabaseModule,
     AuthCommonModule,
+    HealthModule,
     ClientsModule.register([
       {
         name: 'PAGAMENTOS_CLIENT',

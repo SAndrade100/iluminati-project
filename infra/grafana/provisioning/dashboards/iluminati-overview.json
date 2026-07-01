@@ -1,0 +1,111 @@
+{
+  "title": "Iluminati — Visão Geral",
+  "uid": "iluminati-overview",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "10s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Pedidos Criados (total)",
+      "type": "stat",
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "uid": "prometheus" },
+      "targets": [{
+        "expr": "sum(orders_created_total)",
+        "legendFormat": "Total"
+      }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "blue", "value": 0 }] } } }
+    },
+    {
+      "id": 2,
+      "title": "Pagamentos Aprovados (total)",
+      "type": "stat",
+      "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "uid": "prometheus" },
+      "targets": [{
+        "expr": "sum(payments_processed_total{status=\"APPROVED\"})",
+        "legendFormat": "Aprovados"
+      }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "green", "value": 0 }] } } }
+    },
+    {
+      "id": 3,
+      "title": "Pagamentos Recusados (total)",
+      "type": "stat",
+      "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "uid": "prometheus" },
+      "targets": [{
+        "expr": "sum(payments_processed_total{status=\"REFUSED\"})",
+        "legendFormat": "Recusados"
+      }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "red", "value": 0 }] } } }
+    },
+    {
+      "id": 4,
+      "title": "Logins (total)",
+      "type": "stat",
+      "gridPos": { "x": 12, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "uid": "prometheus" },
+      "targets": [{
+        "expr": "sum(auth_logins_total{success=\"true\"})",
+        "legendFormat": "Sucesso"
+      }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "purple", "value": 0 }] } } }
+    },
+    {
+      "id": 5,
+      "title": "Taxa de Pedidos por Minuto",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+      "datasource": { "uid": "prometheus" },
+      "targets": [{
+        "expr": "rate(orders_created_total[1m]) * 60",
+        "legendFormat": "Pedidos/min"
+      }],
+      "fieldConfig": { "defaults": { "unit": "reqpm", "color": { "mode": "palette-classic" } } }
+    },
+    {
+      "id": 6,
+      "title": "Distribuição de Valor dos Pedidos (p50/p95/p99)",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+      "datasource": { "uid": "prometheus" },
+      "targets": [
+        { "expr": "histogram_quantile(0.50, rate(orders_value_bucket[5m]))", "legendFormat": "p50" },
+        { "expr": "histogram_quantile(0.95, rate(orders_value_bucket[5m]))", "legendFormat": "p95" },
+        { "expr": "histogram_quantile(0.99, rate(orders_value_bucket[5m]))", "legendFormat": "p99" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "currencyBRL" } }
+    },
+    {
+      "id": 7,
+      "title": "Latência HTTP p95 por Rota (ms)",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 12, "w": 24, "h": 8 },
+      "datasource": { "uid": "prometheus" },
+      "targets": [{
+        "expr": "histogram_quantile(0.95, sum by (route, method) (rate(http_request_duration_bucket[5m])))",
+        "legendFormat": "{{method}} {{route}}"
+      }],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    },
+    {
+      "id": 8,
+      "title": "Logs Recentes (erro e warn)",
+      "type": "logs",
+      "gridPos": { "x": 0, "y": 20, "w": 24, "h": 8 },
+      "datasource": { "uid": "loki" },
+      "targets": [{
+        "expr": "{job=~\".+\"} |= \"\" | level =~ \"error|warn\"",
+        "legendFormat": ""
+      }],
+      "options": { "showTime": true, "showLabels": true, "wrapLogMessage": false }
+    }
+  ]
+}
