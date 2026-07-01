@@ -7,9 +7,11 @@ import { ObservabilityModule, HealthModule } from '@app/observability';
 import { DatabaseModule } from '@app/database';
 import { AuthCommonModule } from '@app/auth-common';
 import { QUEUES } from '@app/events';
+import { buildConfigModule, AUTH_ENV_SCHEMA, RABBITMQ_ENV_SCHEMA } from '@app/config';
 
 @Module({
   imports: [
+    buildConfigModule({ ...AUTH_ENV_SCHEMA, ...RABBITMQ_ENV_SCHEMA }),
     ObservabilityModule,
     DatabaseModule,
     AuthCommonModule,

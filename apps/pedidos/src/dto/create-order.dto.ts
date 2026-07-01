@@ -3,13 +3,16 @@ import {
   ArrayMinSize, ValidateNested, IsInt, IsPositive,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
 import { PaymentMethod } from '@app/database';
 
 export class OrderItemDto {
+  @ApiProperty({ example: 'clxyz123', description: 'ID do produto' })
   @IsString()
   @IsNotEmpty()
   productId: string;
 
+  @ApiProperty({ example: 2, minimum: 1 })
   @IsInt()
   @IsPositive()
   @Type(() => Number)
@@ -17,12 +20,14 @@ export class OrderItemDto {
 }
 
 export class CreateOrderDto {
+  @ApiProperty({ type: [OrderItemDto] })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
   @Type(() => OrderItemDto)
   items: OrderItemDto[];
 
+  @ApiProperty({ enum: PaymentMethod, example: PaymentMethod.PIX })
   @IsEnum(PaymentMethod)
   paymentMethod: PaymentMethod;
 }

@@ -138,6 +138,142 @@ services:
     networks:
       - iluminati-net
 
+  # ─── NestJS Apps ──────────────────────────────────────────────────────────────
+
+  gateway:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        APP: gateway
+    container_name: iluminati-gateway
+    image: iluminati/gateway
+    env_file: ../.env
+    environment:
+      PORT: "3000"
+      OTEL_SERVICE_NAME: gateway
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - iluminati-net
+    restart: unless-stopped
+
+  auth:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        APP: auth
+    container_name: iluminati-auth
+    image: iluminati/auth
+    env_file: ../.env
+    environment:
+      PORT: "3002"
+      OTEL_SERVICE_NAME: auth
+    ports:
+      - "3002:3002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - iluminati-net
+    restart: unless-stopped
+
+  catalogo:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        APP: catalogo
+    container_name: iluminati-catalogo
+    image: iluminati/catalogo
+    env_file: ../.env
+    environment:
+      PORT: "3001"
+      OTEL_SERVICE_NAME: catalogo
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - iluminati-net
+    restart: unless-stopped
+
+  pedidos:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        APP: pedidos
+    container_name: iluminati-pedidos
+    image: iluminati/pedidos
+    env_file: ../.env
+    environment:
+      PORT: "3003"
+      OTEL_SERVICE_NAME: pedidos
+    ports:
+      - "3003:3003"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - iluminati-net
+    restart: unless-stopped
+
+  pagamentos:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        APP: pagamentos
+    container_name: iluminati-pagamentos
+    image: iluminati/pagamentos
+    env_file: ../.env
+    environment:
+      PORT: "3004"
+      OTEL_SERVICE_NAME: pagamentos
+    ports:
+      - "3004:3004"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - iluminati-net
+    restart: unless-stopped
+
+  seller:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        APP: seller
+    container_name: iluminati-seller
+    image: iluminati/seller
+    env_file: ../.env
+    environment:
+      PORT: "3005"
+      OTEL_SERVICE_NAME: seller
+    ports:
+      - "3005:3005"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - iluminati-net
+    restart: unless-stopped
+
 networks:
   iluminati-net:
     driver: bridge

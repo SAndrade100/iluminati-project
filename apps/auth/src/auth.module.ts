@@ -6,9 +6,11 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { ObservabilityModule, HealthModule } from '@app/observability';
 import { DatabaseModule } from '@app/database';
+import { buildConfigModule, AUTH_ENV_SCHEMA } from '@app/config';
 
 @Module({
   imports: [
+    buildConfigModule(AUTH_ENV_SCHEMA),
     ObservabilityModule,
     DatabaseModule,
     HealthModule,

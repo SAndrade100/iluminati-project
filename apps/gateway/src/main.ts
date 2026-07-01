@@ -4,6 +4,7 @@ import { NestFactory } from '@nestjs/core';
 import { GatewayModule } from './gateway.module';
 import { Logger } from 'nestjs-pino';
 import { ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 
 async function bootstrap() {
@@ -27,6 +28,25 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Iluminati Marketplace — Gateway')
+    .setDescription('Ponto de entrada unificado do marketplace. Autentica, throttle e faz proxy para todos os microsserviços.')
+    .setVersion('1.0')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
+    .addTag('auth', 'Registro, login e refresh de tokens')
+    .addTag('products', 'Catálogo de produtos')
+    .addTag('categories', 'Categorias de produtos')
+    .addTag('cart', 'Carrinho de compras')
+    .addTag('orders', 'Pedidos')
+    .addTag('payments', 'Pagamentos')
+    .addTag('sellers', 'Perfis de vendedores')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('docs', app, document, {
+    swaggerOptions: { persistAuthorization: true },
+  });
 
   await app.listen(process.env.PORT ?? 3000);
 }

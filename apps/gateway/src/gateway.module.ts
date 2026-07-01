@@ -8,9 +8,11 @@ import { ObservabilityModule, HealthModule } from '@app/observability';
 import { AuthCommonModule, JwtAuthGuard, RolesGuard } from '@app/auth-common';
 import { DatabaseModule } from '@app/database';
 import { ThrottlerRedisStorage } from './throttler-redis.storage';
+import { buildConfigModule, AUTH_ENV_SCHEMA, REDIS_ENV_SCHEMA } from '@app/config';
 
 @Module({
   imports: [
+    buildConfigModule({ ...AUTH_ENV_SCHEMA, ...REDIS_ENV_SCHEMA }),
     ObservabilityModule,
     AuthCommonModule,
     DatabaseModule,
