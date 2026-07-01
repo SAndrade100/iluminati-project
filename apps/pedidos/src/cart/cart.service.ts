@@ -82,7 +82,7 @@ export class CartService {
     return { message: 'Cart cleared' };
   }
 
-  async checkout(userId: string, paymentMethod: PaymentMethod) {
+  async checkout(userId: string, paymentMethod: PaymentMethod, couponCode?: string) {
     const cart = await this.getOrCreateCart(userId);
     if (cart.items.length === 0)
       throw new BadRequestException('Cart is empty');
@@ -90,6 +90,7 @@ export class CartService {
     const order = await this.pedidosService.create(userId, {
       items: cart.items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
       paymentMethod,
+      couponCode,
     });
 
     // Esvazia o carrinho após checkout com sucesso

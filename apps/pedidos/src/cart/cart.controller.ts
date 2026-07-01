@@ -58,6 +58,6 @@ export class CartController {
   @Post('checkout')
   @HttpCode(HttpStatus.CREATED)
   checkout(@Body() dto: CheckoutDto, @CurrentUser() user: CurrentUserData) {
-    return this.cartService.checkout(user.userId, dto.paymentMethod);
+    return this.cartService.checkout(user.userId, dto.paymentMethod, dto.couponCode);
   }
 }

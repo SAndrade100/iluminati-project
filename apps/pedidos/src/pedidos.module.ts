@@ -5,6 +5,8 @@ import { PedidosEventsController } from './pedidos-events.controller';
 import { PedidosService } from './pedidos.service';
 import { CartController } from './cart/cart.controller';
 import { CartService } from './cart/cart.service';
+import { CouponController } from './coupons/coupon.controller';
+import { CouponService } from './coupons/coupon.service';
 import { ObservabilityModule, HealthModule } from '@app/observability';
 import { DatabaseModule } from '@app/database';
 import { AuthCommonModule } from '@app/auth-common';
@@ -30,7 +32,7 @@ import { buildConfigModule, AUTH_ENV_SCHEMA, RABBITMQ_ENV_SCHEMA } from '@app/co
       },
     ]),
   ],
-  controllers: [PedidosController, PedidosEventsController, CartController],
-  providers: [PedidosService, CartService],
+  controllers: [PedidosController, PedidosEventsController, CartController, CouponController],
+  providers: [PedidosService, CartService, CouponService],
 })
 export class PedidosModule {}

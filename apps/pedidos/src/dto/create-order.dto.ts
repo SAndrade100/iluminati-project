@@ -1,9 +1,9 @@
 import {
   IsArray, IsEnum, IsNotEmpty, IsString,
-  ArrayMinSize, ValidateNested, IsInt, IsPositive,
+  ArrayMinSize, ValidateNested, IsInt, IsPositive, IsOptional,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PaymentMethod } from '@app/database';
 
 export class OrderItemDto {
@@ -30,4 +30,9 @@ export class CreateOrderDto {
   @ApiProperty({ enum: PaymentMethod, example: PaymentMethod.PIX })
   @IsEnum(PaymentMethod)
   paymentMethod: PaymentMethod;
+
+  @ApiPropertyOptional({ example: 'PROMO10', description: 'Código de cupom de desconto (opcional)' })
+  @IsString()
+  @IsOptional()
+  couponCode?: string;
 }

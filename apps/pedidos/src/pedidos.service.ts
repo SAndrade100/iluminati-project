@@ -6,6 +6,7 @@ import { PrismaService, OrderStatus, ProductStatus } from '@app/database';
 import { MetricsService } from '@app/observability';
 import { EVENTS, OrderCreatedEvent, PaymentProcessedEvent } from '@app/events';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { CouponService } from './coupons/coupon.service';
 
 @Injectable()
 export class PedidosService {
@@ -15,6 +16,7 @@ export class PedidosService {
     private readonly prisma: PrismaService,
     @Inject('PAGAMENTOS_CLIENT') private readonly pagamentosClient: ClientProxy,
     private readonly metrics: MetricsService,
+    private readonly couponService: CouponService,
   ) {}
 
   async create(userId: string, dto: CreateOrderDto) {
@@ -37,16 +39,28 @@ export class PedidosService {
       }
     }
 
-    const totalPrice = dto.items.reduce((sum, item) => {
+    const subtotal = dto.items.reduce((sum, item) => {
       const product = products.find((p) => p.id === item.productId);
       return sum + Number(product.price) * item.quantity;
     }, 0);
+
+    // Aplica cupom se fornecido
+    let discountAmount = 0;
+    let couponId: string | undefined;
+    if (dto.couponCode) {
+      const result = await this.couponService.validate(dto.couponCode, subtotal);
+      discountAmount = result.discount;
+      couponId = result.coupon.id;
+    }
+    const totalPrice = Math.max(0, subtotal - discountAmount);
 
     const order = await this.prisma.$transaction(async (tx) => {
       const created = await tx.order.create({
         data: {
           userId,
           totalPrice,
+          discountAmount: discountAmount > 0 ? discountAmount : undefined,
+          couponId,
           items: {
             create: dto.items.map((item) => {
               const product = products.find((p) => p.id === item.productId);
@@ -72,6 +86,17 @@ export class PedidosService {
         await tx.product.update({
           where: { id: item.productId },
           data: { stock: { decrement: item.quantity } },
+        });
+      }
+
+      // Registra uso do cupom
+      if (couponId) {
+        await tx.couponUsage.create({
+          data: { couponId, userId, orderId: created.id },
+        });
+        await tx.coupon.update({
+          where: { id: couponId },
+          data: { usedCount: { increment: 1 } },
         });
       }
 

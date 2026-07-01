@@ -216,4 +216,86 @@ export class GatewayController {
     const auth = req.headers['authorization'];
     return auth ? { authorization: auth } : {};
   }
+
+  // ─── Reviews ──────────────────────────────────────────────
+  @Post('products/:id/reviews')
+  createReview(@Param('id') id: string, @Body() body: unknown, @Req() req: Request) {
+    return this.gatewaySvc.forward(CATALOGO_URL, 'POST', `/products/${id}/reviews`, body, this.authHeader(req));
+  }
+
+  @Public()
+  @Get('products/:id/reviews')
+  getProductReviews(@Param('id') id: string) {
+    return this.gatewaySvc.forward(CATALOGO_URL, 'GET', `/products/${id}/reviews`);
+  }
+
+  @Get('reviews/mine')
+  getMyReviews(@Req() req: Request) {
+    return this.gatewaySvc.forward(CATALOGO_URL, 'GET', '/reviews/mine', undefined, this.authHeader(req));
+  }
+
+  @Delete('reviews/:reviewId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteReview(@Param('reviewId') reviewId: string, @Req() req: Request) {
+    return this.gatewaySvc.forward(CATALOGO_URL, 'DELETE', `/reviews/${reviewId}`, undefined, this.authHeader(req));
+  }
+
+  // ─── Coupons ──────────────────────────────────────────────
+  @Post('coupons')
+  createCoupon(@Body() body: unknown, @Req() req: Request) {
+    return this.gatewaySvc.forward(PEDIDOS_URL, 'POST', '/coupons', body, this.authHeader(req));
+  }
+
+  @Get('coupons')
+  getCoupons(@Query() query: Record<string, string>, @Req() req: Request) {
+    const qs = new URLSearchParams(query).toString();
+    return this.gatewaySvc.forward(PEDIDOS_URL, 'GET', `/coupons${qs ? `?${qs}` : ''}`, undefined, this.authHeader(req));
+  }
+
+  @Public()
+  @Get('coupons/:code/validate')
+  validateCoupon(@Param('code') code: string, @Query('subtotal') subtotal: string) {
+    const qs = subtotal ? `?subtotal=${subtotal}` : '';
+    return this.gatewaySvc.forward(PEDIDOS_URL, 'GET', `/coupons/${code}/validate${qs}`);
+  }
+
+  @Patch('coupons/:id/activate')
+  @HttpCode(HttpStatus.OK)
+  activateCoupon(@Param('id') id: string, @Req() req: Request) {
+    return this.gatewaySvc.forward(PEDIDOS_URL, 'PATCH', `/coupons/${id}/activate`, undefined, this.authHeader(req));
+  }
+
+  @Patch('coupons/:id/deactivate')
+  @HttpCode(HttpStatus.OK)
+  deactivateCoupon(@Param('id') id: string, @Req() req: Request) {
+    return this.gatewaySvc.forward(PEDIDOS_URL, 'PATCH', `/coupons/${id}/deactivate`, undefined, this.authHeader(req));
+  }
+
+  // ─── Addresses ────────────────────────────────────────────
+  @Get('addresses')
+  getAddresses(@Req() req: Request) {
+    return this.gatewaySvc.forward(AUTH_URL, 'GET', '/addresses', undefined, this.authHeader(req));
+  }
+
+  @Post('addresses')
+  createAddress(@Body() body: unknown, @Req() req: Request) {
+    return this.gatewaySvc.forward(AUTH_URL, 'POST', '/addresses', body, this.authHeader(req));
+  }
+
+  @Patch('addresses/:id')
+  updateAddress(@Param('id') id: string, @Body() body: unknown, @Req() req: Request) {
+    return this.gatewaySvc.forward(AUTH_URL, 'PATCH', `/addresses/${id}`, body, this.authHeader(req));
+  }
+
+  @Put('addresses/:id/default')
+  @HttpCode(HttpStatus.OK)
+  setDefaultAddress(@Param('id') id: string, @Req() req: Request) {
+    return this.gatewaySvc.forward(AUTH_URL, 'PUT', `/addresses/${id}/default`, undefined, this.authHeader(req));
+  }
+
+  @Delete('addresses/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteAddress(@Param('id') id: string, @Req() req: Request) {
+    return this.gatewaySvc.forward(AUTH_URL, 'DELETE', `/addresses/${id}`, undefined, this.authHeader(req));
+  }
 }

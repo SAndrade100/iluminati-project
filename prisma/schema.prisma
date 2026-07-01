@@ -49,18 +49,33 @@ enum PaymentMethod {
   BOLETO
 }
 
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+enum AddressLabel {
+  HOME
+  WORK
+  OTHER
+}
+
 // ───────────────────────────────
 // Models
 // ───────────────────────────────
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  password  String
-  role      Role     @default(CUSTOMER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String        @id @default(cuid())
+  email        String        @unique
+  name         String?
+  password     String
+  role         Role          @default(CUSTOMER)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  seller       Seller?
+  reviews      Review[]
+  addresses    Address[]
+  couponUsages CouponUsage[]
 
   @@map("users")
 }
@@ -81,6 +96,7 @@ model Product {
   category    Category?     @relation(fields: [categoryId], references: [id])
   orderItems  OrderItem[]
   cartItems   CartItem[]
+  reviews     Review[]
 
   @@map("products")
 }
@@ -94,6 +110,7 @@ model Seller {
   status         SellerStatus @default(PENDING)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+  user           User         @relation(fields: [userId], references: [id])
   products       Product[]
 
   @@map("sellers")
@@ -134,14 +151,17 @@ model CartItem {
 }
 
 model Order {
-  id         String      @id @default(cuid())
-  userId     String
-  status     OrderStatus @default(PENDING)
-  totalPrice Decimal     @db.Decimal(10, 2)
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  items      OrderItem[]
-  payment    Payment?
+  id             String       @id @default(cuid())
+  userId         String
+  status         OrderStatus  @default(PENDING)
+  totalPrice     Decimal      @db.Decimal(10, 2)
+  discountAmount Decimal?     @db.Decimal(10, 2)
+  couponId       String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  items          OrderItem[]
+  payment        Payment?
+  couponUsage    CouponUsage?
 
   @@map("orders")
 }
@@ -171,4 +191,77 @@ model Payment {
   order         Order         @relation(fields: [orderId], references: [id])
 
   @@map("payments")
+}
+
+// ─── Reviews ─────────────────────────────────────────────────────────────────
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  orderId   String?
+  rating    Int      // 1–5
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
+  @@map("reviews")
+}
+
+// ─── Coupons ─────────────────────────────────────────────────────────────────
+
+model Coupon {
+  id            String        @id @default(cuid())
+  code          String        @unique
+  description   String?
+  discountType  DiscountType
+  discountValue Decimal       @db.Decimal(10, 2)
+  minOrderValue Decimal?      @db.Decimal(10, 2)
+  maxUses       Int?
+  usedCount     Int           @default(0)
+  expiresAt     DateTime?
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  usages        CouponUsage[]
+
+  @@map("coupons")
+}
+
+model CouponUsage {
+  id       String   @id @default(cuid())
+  couponId String
+  userId   String
+  orderId  String   @unique
+  usedAt   DateTime @default(now())
+  coupon   Coupon   @relation(fields: [couponId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  order    Order    @relation(fields: [orderId], references: [id])
+
+  @@unique([couponId, userId])
+  @@map("coupon_usages")
+}
+
+// ─── Addresses ───────────────────────────────────────────────────────────────
+
+model Address {
+  id           String       @id @default(cuid())
+  userId       String
+  label        AddressLabel @default(HOME)
+  street       String
+  number       String
+  complement   String?
+  neighborhood String
+  city         String
+  state        String       @db.Char(2)
+  zipCode      String
+  isDefault    Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@map("addresses")
 }

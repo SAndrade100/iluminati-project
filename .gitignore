@@ -1,7 +1,13 @@
 # compiled output
 /dist
-/node_modules
 /build
+
+# Nuxt build & output
+.nuxt/
+.output/
+
+# Node modules (all levels)
+node_modules/
 
 # Logs
 logs

@@ -12,14 +12,16 @@ async function bootstrap() {
 
   app.useLogger(app.get(Logger));
 
-  app.use(helmet());
-
+  // CORS must be enabled before Helmet so preflight OPTIONS responses
+  // include the correct Access-Control-Allow-Origin header.
   app.enableCors({
     origin: process.env.CORS_ALLOWED_ORIGINS?.split(',') ?? ['http://localhost:3000'],
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   });
+
+  app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
   app.useGlobalPipes(
     new ValidationPipe({
